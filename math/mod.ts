@@ -63,7 +63,7 @@ export const bezier = (
 
 /**
  * FuzzyEquals is a function that compares two numbers and returns true if they are approximately equal.
- * 
+ *
  * @example
  * ```ts
  * fuzzyEquals(0.1 + 0.2, 0.3); // true
