@@ -1125,23 +1125,28 @@ async function handler(req: Request): Promise<Response> {
         
         // Check if this is a request for raw content (for imports) vs viewing
         const acceptHeader = req.headers.get("accept") || "";
-        const isImportRequest = acceptHeader.includes("text/typescript") || 
-                               acceptHeader.includes("application/typescript") ||
-                               acceptHeader.includes("*/*") ||
-                               !acceptHeader.includes("text/html");
+        const userAgent = req.headers.get("user-agent") || "";
+        
+        // Browser requests typically include "text/html" and have user-agent
+        // Import requests typically don't include "text/html" or are from deno/node
+        const isBrowserRequest = acceptHeader.includes("text/html") || 
+                                userAgent.includes("Mozilla") ||
+                                userAgent.includes("Chrome") ||
+                                userAgent.includes("Safari") ||
+                                userAgent.includes("Firefox");
 
-        // For TypeScript files: serve raw content for imports, HTML viewer for browser
+        // For TypeScript files: serve HTML viewer for browsers, raw content for imports
         if (ext === "ts") {
-          if (isImportRequest) {
+          if (isBrowserRequest) {
+            return new Response(generateFilePage(pathname, content), {
+              headers: { "content-type": "text/html" },
+            });
+          } else {
             return new Response(content, {
               headers: { 
                 "content-type": "application/typescript",
                 "access-control-allow-origin": "*"
               },
-            });
-          } else {
-            return new Response(generateFilePage(pathname, content), {
-              headers: { "content-type": "text/html" },
             });
           }
         }
