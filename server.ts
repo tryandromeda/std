@@ -987,14 +987,16 @@ function generateFilePage(filePath: string, content: string): string {
 
   let highlightedContent = content;
   if (fileExtension === "ts") {
-    highlightedContent = content
-      .replace(
-        /\b(export|import|class|function|const|let|var|if|else|for|while|return|interface|type|enum)\b/g,
-        '<span class="keyword">$1</span>',
-      )
-      .replace(/"([^"]*)"/g, '<span class="string">"$1"</span>')
+    // Highlight comments first
+    highlightedContent = highlightedContent
       .replace(/\/\/.*$/gm, '<span class="comment">$&</span>')
       .replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>');
+    // Highlight strings (avoid inside comments)
+    highlightedContent = highlightedContent
+      .replace(/"([^"\n]*)"/g, '<span class="string">"$1"</span>');
+    // Highlight keywords (avoid inside tags)
+    highlightedContent = highlightedContent
+      .replace(/(?<![>])\b(export|import|class|function|const|let|var|if|else|for|while|return|interface|type|enum)\b/g, '<span class="keyword">$1</span>');
   }
 
   return `<!DOCTYPE html>
@@ -1119,11 +1121,33 @@ async function handler(req: Request): Promise<Response> {
 
       if (fileInfo.isFile) {
         const content = await Deno.readTextFile(filePath);
-
         const ext = pathname.split(".").pop()?.toLowerCase();
-        const contentType = ext === "ts" ?
-          "text/html" :
-          ext === "js" ?
+        
+        // Check if this is a request for raw content (for imports) vs viewing
+        const acceptHeader = req.headers.get("accept") || "";
+        const isImportRequest = acceptHeader.includes("text/typescript") || 
+                               acceptHeader.includes("application/typescript") ||
+                               acceptHeader.includes("*/*") ||
+                               !acceptHeader.includes("text/html");
+
+        // For TypeScript files: serve raw content for imports, HTML viewer for browser
+        if (ext === "ts") {
+          if (isImportRequest) {
+            return new Response(content, {
+              headers: { 
+                "content-type": "application/typescript",
+                "access-control-allow-origin": "*"
+              },
+            });
+          } else {
+            return new Response(generateFilePage(pathname, content), {
+              headers: { "content-type": "text/html" },
+            });
+          }
+        }
+
+        // For other file types
+        const contentType = ext === "js" ?
           "application/javascript" :
           ext === "json" ?
           "application/json" :
@@ -1131,13 +1155,16 @@ async function handler(req: Request): Promise<Response> {
           "text/html" :
           "text/plain";
 
-        if (ext === "ts" || ext === "md" || ext === "json") {
+        if (ext === "md" || ext === "json") {
           return new Response(generateFilePage(pathname, content), {
             headers: { "content-type": "text/html" },
           });
         } else {
           return new Response(content, {
-            headers: { "content-type": contentType },
+            headers: { 
+              "content-type": contentType,
+              "access-control-allow-origin": "*"
+            },
           });
         }
       }
