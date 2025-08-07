@@ -1,7 +1,6 @@
 import { join } from "jsr:@std/path";
 
-const PORT = 8000;
-const BASE_URL = `http://${Deno.hostname()}:${PORT}`;
+const BASE_URL = "https://https://std.load1n9.deno.net";
 const PROJECT_ROOT = Deno.cwd();
 
 interface FileType {
@@ -562,7 +561,7 @@ code {
 
 function extractTSDocumentation(
   content: string,
-): { description?: string; exports: string[]; imports: string[]; } {
+): { description?: string; exports: string[]; imports: string[] } {
   const exports: string[] = [];
   const imports: string[] = [];
   let description: string | undefined;
@@ -979,11 +978,11 @@ console.log('Ready to use ${structure.name}!');</code></pre>
 function generateFilePage(filePath: string, content: string): string {
   const fileName = filePath.split("/").pop() || filePath;
   const fileExtension = fileName.split(".").pop() || "";
-  const language = fileExtension === "ts" ?
-    "TypeScript" :
-    fileExtension === "md" ?
-    "Markdown" :
-    "Text";
+  const language = fileExtension === "ts"
+    ? "TypeScript"
+    : fileExtension === "md"
+    ? "Markdown"
+    : "Text";
 
   let highlightedContent = content;
   if (fileExtension === "ts") {
@@ -996,7 +995,10 @@ function generateFilePage(filePath: string, content: string): string {
       .replace(/"([^"\n]*)"/g, '<span class="string">"$1"</span>');
     // Highlight keywords (avoid inside tags)
     highlightedContent = highlightedContent
-      .replace(/(?<![>])\b(export|import|class|function|const|let|var|if|else|for|while|return|interface|type|enum)\b/g, '<span class="keyword">$1</span>');
+      .replace(
+        /(?<![>])\b(export|import|class|function|const|let|var|if|else|for|while|return|interface|type|enum)\b/g,
+        '<span class="keyword">$1</span>',
+      );
   }
 
   return `<!DOCTYPE html>
@@ -1122,18 +1124,18 @@ async function handler(req: Request): Promise<Response> {
       if (fileInfo.isFile) {
         const content = await Deno.readTextFile(filePath);
         const ext = pathname.split(".").pop()?.toLowerCase();
-        
+
         // Check if this is a request for raw content (for imports) vs viewing
         const acceptHeader = req.headers.get("accept") || "";
         const userAgent = req.headers.get("user-agent") || "";
-        
+
         // Browser requests typically include "text/html" and have user-agent
         // Import requests typically don't include "text/html" or are from deno/node
-        const isBrowserRequest = acceptHeader.includes("text/html") || 
-                                userAgent.includes("Mozilla") ||
-                                userAgent.includes("Chrome") ||
-                                userAgent.includes("Safari") ||
-                                userAgent.includes("Firefox");
+        const isBrowserRequest = acceptHeader.includes("text/html") ||
+          userAgent.includes("Mozilla") ||
+          userAgent.includes("Chrome") ||
+          userAgent.includes("Safari") ||
+          userAgent.includes("Firefox");
 
         // For TypeScript files: serve HTML viewer for browsers, raw content for imports
         if (ext === "ts") {
@@ -1143,22 +1145,22 @@ async function handler(req: Request): Promise<Response> {
             });
           } else {
             return new Response(content, {
-              headers: { 
+              headers: {
                 "content-type": "application/typescript",
-                "access-control-allow-origin": "*"
+                "access-control-allow-origin": "*",
               },
             });
           }
         }
 
         // For other file types
-        const contentType = ext === "js" ?
-          "application/javascript" :
-          ext === "json" ?
-          "application/json" :
-          ext === "md" ?
-          "text/html" :
-          "text/plain";
+        const contentType = ext === "js"
+          ? "application/javascript"
+          : ext === "json"
+          ? "application/json"
+          : ext === "md"
+          ? "text/html"
+          : "text/plain";
 
         if (ext === "md" || ext === "json") {
           return new Response(generateFilePage(pathname, content), {
@@ -1166,9 +1168,9 @@ async function handler(req: Request): Promise<Response> {
           });
         } else {
           return new Response(content, {
-            headers: { 
+            headers: {
               "content-type": contentType,
-              "access-control-allow-origin": "*"
+              "access-control-allow-origin": "*",
             },
           });
         }
