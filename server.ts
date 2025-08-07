@@ -1,6 +1,6 @@
 import { join } from "jsr:@std/path";
 
-const BASE_URL = "https://https://std.load1n9.deno.net";
+const BASE_URL = "https://std.load1n9.deno.net";
 const PROJECT_ROOT = Deno.cwd();
 
 interface FileType {
