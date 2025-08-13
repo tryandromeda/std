@@ -1322,6 +1322,33 @@ async function handler(req: Request): Promise<Response> {
             ],
           },
         ];
+        // prompts/initialize (for extension initialization)
+        if (method === "initialize") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  server: "Andromeda MCP Server",
+                  version: "1.0.0",
+                  capabilities: {
+                    prompts: ["list", "get"],
+                    resources: ["list", "read", "templates/list", "subscribe"],
+                  },
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+              },
+            },
+          );
+        }
         // prompts/list
         if (method === "prompts/list") {
           return new Response(
@@ -1339,8 +1366,8 @@ async function handler(req: Request): Promise<Response> {
             ),
             {
               headers: {
-                "content-type": "application/json",
-                "access-control-allow-origin": "*",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
               },
             },
           );
