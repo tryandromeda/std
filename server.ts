@@ -1118,6 +1118,33 @@ function generateFilePage(filePath: string, content: string): string {
 }
 
 async function handler(req: Request): Promise<Response> {
+  async function callOpenAI(
+    messages: Array<{ role: string; content: string; }>,
+  ) {
+    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!apiKey) {
+      throw new Error("Missing OPENAI_API_KEY environment variable");
+    }
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages,
+        max_tokens: 1024,
+        temperature: 0.2,
+      }),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+    }
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
+  }
   const url = new URL(req.url);
   const pathname = url.pathname;
 
@@ -1247,38 +1274,44 @@ async function handler(req: Request): Promise<Response> {
               },
             );
           }
-          // Example: embed code argument in message
-          let messages = [];
+          let openaiMessages: Array<{ role: string; content: string; }> = [];
           if (name === "code_review" && args.code) {
-            messages = [
+            openaiMessages = [
+              {
+                role: "system",
+                content:
+                  "You are an expert code reviewer. Analyze the following code and suggest improvements, best practices, and potential issues. Respond concisely and clearly.",
+              },
               {
                 role: "user",
-                content: {
-                  type: "text",
-                  text: `Please review this code:\n${args.code}`,
-                },
+                content: args.code,
               },
             ];
           } else if (name === "doc_summary" && args.doc) {
-            messages = [
+            openaiMessages = [
+              {
+                role: "system",
+                content:
+                  "You are an expert technical writer. Summarize the following documentation for a developer audience.",
+              },
               {
                 role: "user",
-                content: {
-                  type: "text",
-                  text: `Summarize the following documentation:\n${args.doc}`,
-                },
+                content: args.doc,
               },
             ];
           } else {
-            messages = [
+            openaiMessages = [
               {
                 role: "user",
-                content: {
-                  type: "text",
-                  text: `Prompt: ${prompt.title}`,
-                },
+                content: prompt.title,
               },
             ];
+          }
+          let llmResponse = "";
+          try {
+            llmResponse = await callOpenAI(openaiMessages);
+          } catch (err) {
+            llmResponse = `Error calling OpenAI: ${err}`;
           }
           return new Response(
             JSON.stringify(
@@ -1287,7 +1320,7 @@ async function handler(req: Request): Promise<Response> {
                 id,
                 result: {
                   description: prompt.description,
-                  messages,
+                  response: llmResponse,
                 },
               },
               null,

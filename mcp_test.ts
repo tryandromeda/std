@@ -1,4 +1,5 @@
-const BASE_URL = "https://std.load1n9.deno.net/mcp";
+// const BASE_URL = "https://std.load1n9.deno.net/mcp";
+const BASE_URL = "http://localhost:8000/mcp";
 
 async function post(endpoint: string, body: object) {
   const res = await fetch(`${BASE_URL}/${endpoint}`, {
@@ -28,4 +29,17 @@ await post("resources", {
   method: "resources/read",
   params: { uri: "file:///collections/mod.ts" },
   id: 3,
+});
+
+// Test OpenAI-powered code review prompt
+await post("prompts", {
+  jsonrpc: "2.0",
+  method: "prompts/get",
+  params: {
+    name: "code_review",
+    arguments: {
+      code: "export function add(a, b) { return a + b; }",
+    },
+  },
+  id: 4,
 });
