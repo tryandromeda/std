@@ -1,14 +1,39 @@
-import { join } from "jsr:@std/path";
-
-const BASE_URL = "https://std.load1n9.deno.net";
-const PROJECT_ROOT = Deno.cwd();
-
+// Type definitions
 interface FileType {
   extensions: string[];
   icon: string;
   language: string;
   description: string;
 }
+
+interface FileInfo {
+  name: string;
+  relativePath: string;
+  type: FileType;
+  description?: string;
+  exports?: string[];
+  imports?: string[];
+}
+
+interface DirectoryInfo {
+  name: string;
+  files: FileInfo[];
+  icon: string;
+  description?: string;
+}
+
+interface ProjectStructure {
+  name: string;
+  description: string;
+  version: string;
+  rootFiles: FileInfo[];
+  directories: DirectoryInfo[];
+}
+
+import { join } from "jsr:@std/path";
+
+const BASE_URL = "https://std.load1n9.deno.net";
+const PROJECT_ROOT = Deno.cwd();
 
 const FILE_TYPES: Record<string, FileType> = {
   typescript: {
@@ -36,22 +61,6 @@ const FILE_TYPES: Record<string, FileType> = {
     description: "Text file",
   },
 };
-
-interface FileInfo {
-  name: string;
-  relativePath: string;
-  type: FileType;
-  description?: string;
-  exports?: string[];
-  imports?: string[];
-}
-
-interface DirectoryInfo {
-  name: string;
-  files: FileInfo[];
-  icon: string;
-  description?: string;
-}
 
 interface ProjectStructure {
   name: string;
@@ -606,7 +615,9 @@ function extractTSDocumentation(
 // Determine file type from extension
 function getFileType(filename: string): FileType {
   const ext = filename.toLowerCase().split(".").pop() || "";
-  for (const [, fileType] of Object.entries(FILE_TYPES)) {
+  for (
+    const [, fileType] of Object.entries(FILE_TYPES) as [string, FileType][]
+  ) {
     if (fileType.extensions.includes("." + ext)) {
       return fileType;
     }
@@ -713,19 +724,19 @@ async function getProjectStructure(): Promise<ProjectStructure> {
     projectStructure = await analyzeProject();
     lastAnalyzed = now;
   }
-  return projectStructure;
+  return projectStructure as ProjectStructure;
 }
 
 function generateNavLinks(structure: ProjectStructure): string {
-  const mainDirs = structure.directories.filter((dir) =>
+  const mainDirs = structure.directories.filter((dir: DirectoryInfo) =>
     !dir.name.startsWith(".") &&
-    dir.files.some((f) => f.name.endsWith(".ts"))
+    dir.files.some((f: FileInfo) => f.name.endsWith(".ts"))
   );
 
   let navItems = '<li><a href="/">Home</a></li>';
 
   for (const dir of mainDirs) {
-    const modFile = dir.files.find((f) => f.name === "mod.ts");
+    const modFile = dir.files.find((f: FileInfo) => f.name === "mod.ts");
     if (modFile) {
       navItems += `<li><a href="/${modFile.relativePath}">${
         dir.name.charAt(0).toUpperCase() + dir.name.slice(1)
@@ -733,7 +744,9 @@ function generateNavLinks(structure: ProjectStructure): string {
     }
   }
 
-  const mainMod = structure.rootFiles.find((f) => f.name === "mod.ts");
+  const mainMod = structure.rootFiles.find((f: FileInfo) =>
+    f.name === "mod.ts"
+  );
   if (mainMod) {
     navItems += `<li><a href="/${mainMod.relativePath}">Main Module</a></li>`;
   }
@@ -1110,6 +1123,562 @@ async function handler(req: Request): Promise<Response> {
 
   try {
     if (pathname.startsWith("/mcp/")) {
+      // MCP JSON-RPC prompts protocol
+      if (pathname === "/mcp/prompts") {
+        if (req.method !== "POST") {
+          return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+            status: 405,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          });
+        }
+        let body: Record<string, unknown> = {};
+        try {
+          body = await req.json();
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+            status: 400,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          });
+        }
+        const method = typeof body.method === "string" ? body.method : "";
+        const params = typeof body.params === "object" && body.params !== null ?
+          body.params :
+          {};
+        const id = body.id;
+        // Example prompt definitions
+        const promptDefs = [
+          {
+            name: "code_review",
+            title: "Request Code Review",
+            description:
+              "Asks the LLM to analyze code quality and suggest improvements",
+            arguments: [
+              {
+                name: "code",
+                description: "The code to review",
+                required: true,
+              },
+            ],
+          },
+          {
+            name: "doc_summary",
+            title: "Summarize Documentation",
+            description: "Summarizes the README or module documentation.",
+            arguments: [
+              {
+                name: "doc",
+                description: "Documentation text",
+                required: true,
+              },
+            ],
+          },
+        ];
+        // prompts/list
+        if (method === "prompts/list") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  prompts: promptDefs,
+                  nextCursor: null,
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // prompts/get
+        if (method === "prompts/get") {
+          let name = "";
+          let args: Record<string, string> = {};
+          if (params && typeof params === "object") {
+            if (
+              "name" in params &&
+              typeof (params as { name: unknown; }).name === "string"
+            ) {
+              name = (params as { name: string; }).name;
+            }
+            if (
+              "arguments" in params &&
+              typeof (params as { arguments: unknown; }).arguments ===
+                "object" &&
+              (params as { arguments: unknown; }).arguments !== null
+            ) {
+              args =
+                (params as { arguments: Record<string, string>; }).arguments;
+            }
+          }
+          const prompt = promptDefs.find(p => p.name === name);
+          if (!prompt) {
+            return new Response(
+              JSON.stringify(
+                {
+                  jsonrpc: "2.0",
+                  id,
+                  error: {
+                    code: -32602,
+                    message: "Invalid prompt name",
+                  },
+                },
+                null,
+                2,
+              ),
+              {
+                status: 404,
+                headers: {
+                  "content-type": "application/json",
+                  "access-control-allow-origin": "*",
+                },
+              },
+            );
+          }
+          // Example: embed code argument in message
+          let messages = [];
+          if (name === "code_review" && args.code) {
+            messages = [
+              {
+                role: "user",
+                content: {
+                  type: "text",
+                  text: `Please review this code:\n${args.code}`,
+                },
+              },
+            ];
+          } else if (name === "doc_summary" && args.doc) {
+            messages = [
+              {
+                role: "user",
+                content: {
+                  type: "text",
+                  text: `Summarize the following documentation:\n${args.doc}`,
+                },
+              },
+            ];
+          } else {
+            messages = [
+              {
+                role: "user",
+                content: {
+                  type: "text",
+                  text: `Prompt: ${prompt.title}`,
+                },
+              },
+            ];
+          }
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  description: prompt.description,
+                  messages,
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // notifications/prompts/list_changed (mock)
+        if (method === "notifications/prompts/list_changed") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                method: "notifications/prompts/list_changed",
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // Unknown method
+        return new Response(
+          JSON.stringify(
+            {
+              jsonrpc: "2.0",
+              id,
+              error: {
+                code: -32601,
+                message: "Method not found",
+              },
+            },
+            null,
+            2,
+          ),
+          {
+            status: 404,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          },
+        );
+      }
+      // MCP JSON-RPC resources protocol
+      if (pathname === "/mcp/resources") {
+        if (req.method !== "POST") {
+          return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+            status: 405,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          });
+        }
+        let body: Record<string, unknown> = {};
+        try {
+          body = await req.json();
+        } catch {
+          return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+            status: 400,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          });
+        }
+        const { method, params, id } = body;
+        // resources/list
+        if (method === "resources/list") {
+          const structure = await getProjectStructure();
+          const resources = [];
+          for (const file of structure.rootFiles) {
+            resources.push({
+              uri: `file:///${file.relativePath}`,
+              name: file.name,
+              title: file.name,
+              description: file.description || file.type.description,
+              mimeType: file.type.language === "TypeScript" ?
+                "application/typescript" :
+                file.type.language === "Markdown" ?
+                "text/markdown" :
+                "text/plain",
+              annotations: {
+                audience: ["user", "assistant"],
+                priority: 0.7,
+                lastModified: new Date().toISOString(),
+              },
+            });
+          }
+          for (const dir of structure.directories) {
+            for (const file of dir.files) {
+              resources.push({
+                uri: `file:///${file.relativePath}`,
+                name: file.name,
+                title: file.name,
+                description: file.description || file.type.description,
+                mimeType: file.type.language === "TypeScript" ?
+                  "application/typescript" :
+                  file.type.language === "Markdown" ?
+                  "text/markdown" :
+                  "text/plain",
+                annotations: {
+                  audience: ["user", "assistant"],
+                  priority: 0.7,
+                  lastModified: new Date().toISOString(),
+                },
+              });
+            }
+          }
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  resources,
+                  nextCursor: null,
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // resources/read
+        if (method === "resources/read") {
+          let uri = "";
+          if (params && typeof params === "object" && "uri" in params) {
+            uri = (params as { uri: string; }).uri;
+          }
+          if (!uri || !uri.startsWith("file://")) {
+            return new Response(
+              JSON.stringify(
+                {
+                  jsonrpc: "2.0",
+                  id,
+                  error: {
+                    code: -32002,
+                    message: "Resource not found",
+                    data: { uri },
+                  },
+                },
+                null,
+                2,
+              ),
+              {
+                status: 404,
+                headers: {
+                  "content-type": "application/json",
+                  "access-control-allow-origin": "*",
+                },
+              },
+            );
+          }
+          const relPath = uri.replace("file:///", "");
+          let fileContent = "";
+          let fileInfo: FileInfo | null = null;
+          const structure = await getProjectStructure();
+          const foundRoot = structure.rootFiles.find(f =>
+            f.relativePath === relPath
+          );
+          if (foundRoot) {
+            fileInfo = foundRoot;
+          } else {
+            for (const dir of structure.directories) {
+              const foundDir = dir.files.find(f => f.relativePath === relPath);
+              if (foundDir) {
+                fileInfo = foundDir;
+                break;
+              }
+            }
+          }
+          if (!fileInfo) {
+            return new Response(
+              JSON.stringify(
+                {
+                  jsonrpc: "2.0",
+                  id,
+                  error: {
+                    code: -32002,
+                    message: "Resource not found",
+                    data: { uri },
+                  },
+                },
+                null,
+                2,
+              ),
+              {
+                status: 404,
+                headers: {
+                  "content-type": "application/json",
+                  "access-control-allow-origin": "*",
+                },
+              },
+            );
+          }
+          try {
+            fileContent = await Deno.readTextFile(join(PROJECT_ROOT, relPath));
+          } catch {
+            fileContent = "";
+          }
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  contents: [
+                    {
+                      uri,
+                      name: fileInfo.name,
+                      title: fileInfo.name,
+                      mimeType: fileInfo.type.language === "TypeScript" ?
+                        "application/typescript" :
+                        fileInfo.type.language === "Markdown" ?
+                        "text/markdown" :
+                        "text/plain",
+                      text: fileContent,
+                      annotations: {
+                        audience: ["user", "assistant"],
+                        priority: 0.7,
+                        lastModified: new Date().toISOString(),
+                      },
+                    },
+                  ],
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // resources/templates/list
+        if (method === "resources/templates/list") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  resourceTemplates: [
+                    {
+                      uriTemplate: "file:///{path}",
+                      name: "Project Files",
+                      title: "📁 Project Files",
+                      description: "Access files in the project directory",
+                      mimeType: "application/octet-stream",
+                    },
+                  ],
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // resources/subscribe (mock, no real notifications)
+        if (method === "resources/subscribe") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                id,
+                result: {
+                  subscribed: true,
+                },
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // notifications/resources/list_changed (mock)
+        if (method === "notifications/resources/list_changed") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                method: "notifications/resources/list_changed",
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // notifications/resources/updated (mock)
+        if (method === "notifications/resources/updated") {
+          return new Response(
+            JSON.stringify(
+              {
+                jsonrpc: "2.0",
+                method: "notifications/resources/updated",
+                params: params || {},
+              },
+              null,
+              2,
+            ),
+            {
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        // Unknown method
+        return new Response(
+          JSON.stringify(
+            {
+              jsonrpc: "2.0",
+              id,
+              error: {
+                code: -32601,
+                message: "Method not found",
+              },
+            },
+            null,
+            2,
+          ),
+          {
+            status: 404,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          },
+        );
+      }
+      // MCP Authorization Metadata Endpoint (RFC9728)
+      if (pathname === "/mcp/metadata") {
+        // Example: return authorization_servers and resource info
+        const metadata = {
+          authorization_servers: [
+            "https://auth.example.com/.well-known/oauth-authorization-server",
+          ],
+          resource: "https://std.load1n9.deno.net/mcp",
+          capabilities: {
+            resources: { subscribe: true, listChanged: true },
+            prompts: { listChanged: true },
+            sampling: {},
+          },
+        };
+        return new Response(JSON.stringify(metadata, null, 2), {
+          headers: {
+            "content-type": "application/json",
+            "access-control-allow-origin": "*",
+          },
+        });
+      }
       if (pathname === "/mcp/project") {
         const structure = await getProjectStructure();
         return new Response(JSON.stringify(structure, null, 2), {
@@ -1147,13 +1716,19 @@ async function handler(req: Request): Promise<Response> {
           }
         }
         if (!fileInfo) {
-          return new Response(JSON.stringify({ error: "File not found" }), {
-            status: 404,
-            headers: {
-              "content-type": "application/json",
-              "access-control-allow-origin": "*",
+          // Return 401 Unauthorized with WWW-Authenticate header for MCP spec
+          return new Response(
+            JSON.stringify({ error: "File not found or unauthorized" }),
+            {
+              status: 401,
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+                "WWW-Authenticate":
+                  `Bearer authorization_uri="${BASE_URL}/mcp/metadata"`,
+              },
             },
-          });
+          );
         }
         return new Response(JSON.stringify(fileInfo, null, 2), {
           headers: {
@@ -1180,13 +1755,19 @@ async function handler(req: Request): Promise<Response> {
         const structure = await getProjectStructure();
         const dirInfo = structure.directories.find(d => d.name === moduleName);
         if (!dirInfo) {
-          return new Response(JSON.stringify({ error: "Module not found" }), {
-            status: 404,
-            headers: {
-              "content-type": "application/json",
-              "access-control-allow-origin": "*",
+          // Return 401 Unauthorized with WWW-Authenticate header for MCP spec
+          return new Response(
+            JSON.stringify({ error: "Module not found or unauthorized" }),
+            {
+              status: 401,
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+                "WWW-Authenticate":
+                  `Bearer authorization_uri="${BASE_URL}/mcp/metadata"`,
+              },
             },
-          });
+          );
         }
         return new Response(JSON.stringify(dirInfo, null, 2), {
           headers: {
