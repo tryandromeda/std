@@ -152,6 +152,7 @@ body {
   padding: 2rem 1rem;
 }
 
+
 /* Navigation */
 .navbar {
   background: var(--color-mantle);
@@ -159,7 +160,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .navbar-content {
@@ -168,24 +169,32 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
-  height: 4rem;
+  padding: 0 1.5rem;
+  height: 3.5rem;
 }
 
 .logo {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--color-blue);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.brand {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-mauve);
+  margin-left: 0.5rem;
 }
 
 .nav-links {
   display: flex;
   list-style: none;
-  gap: 2rem;
+  gap: 1.25rem;
   align-items: center;
 }
 
@@ -194,13 +203,21 @@ body {
   text-decoration: none;
   font-weight: 500;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
+  font-size: 1rem;
 }
 
-.nav-links a:hover {
-  color: var(--color-text);
+.nav-links a.active, .nav-links a:hover {
+  color: var(--color-blue);
   background: var(--color-surface0);
+}
+
+.nav-divider {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--color-surface1);
+  margin: 0 0.5rem;
 }
 
 /* Mobile menu */
@@ -289,22 +306,27 @@ body {
   box-shadow: 0 8px 25px rgba(137, 180, 250, 0.3);
 }
 
+
 /* Module grid */
 .modules-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 4rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .module-card {
   background: var(--color-mantle);
   border: 1px solid var(--color-surface0);
-  border-radius: 16px;
-  padding: 2rem;
-  transition: all 0.3s ease;
+  border-radius: 14px;
+  padding: 1.5rem 1.25rem;
+  transition: box-shadow 0.2s, transform 0.2s;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 12px rgba(137,180,250,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .module-card::before {
@@ -318,42 +340,56 @@ body {
 }
 
 .module-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border-color: var(--color-surface1);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(137,180,250,0.10);
+  border-color: var(--color-blue);
 }
 
 .module-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: var(--color-text);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-blue);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .module-card p {
   color: var(--color-subtext1);
-  margin-bottom: 1.5rem;
-  line-height: 1.7;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.module-meta {
+  margin: 0.5rem 0 0.5rem 0;
+  display: flex;
+  gap: 1.2rem;
+  font-size: 0.9rem;
+  color: var(--color-subtext0);
 }
 
 .module-links {
   display: flex;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 .module-link {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.9rem;
   background: var(--color-surface0);
-  color: var(--color-text);
+  color: var(--color-blue);
   text-decoration: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid transparent;
 }
 
 .module-link:hover {
-  background: var(--color-surface1);
-  color: var(--color-blue);
+  background: var(--color-blue);
+  color: #fff;
+  border-color: var(--color-blue);
 }
 
 /* File browser */
@@ -416,6 +452,7 @@ body {
   font-size: 0.875rem;
 }
 
+
 /* Code containers */
 .code-container {
   background: var(--color-mantle);
@@ -423,6 +460,7 @@ body {
   border-radius: 12px;
   overflow: hidden;
   margin: 1.5rem 0;
+  box-shadow: 0 2px 12px rgba(137,180,250,0.04);
 }
 
 .code-header {
@@ -431,41 +469,71 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--color-surface1);
 }
 
 .code-lang {
   color: var(--color-blue);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .code-filename {
   color: var(--color-subtext1);
+  font-size: 0.95rem;
 }
 
 .copy-button {
   background: var(--color-blue);
   color: white;
   border: none;
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 1rem;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(137,180,250,0.07);
 }
 
 .copy-button:hover {
   background: var(--color-sapphire);
+  box-shadow: 0 4px 16px rgba(137,180,250,0.12);
+}
+
+.code-viewer {
+  position: relative;
+}
+
+.code-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.2em;
+  background: var(--color-crust);
+  color: var(--color-overlay0);
+  text-align: right;
+  font-size: 0.85em;
+  padding: 1.5rem 0.5em 1.5rem 0.5em;
+  user-select: none;
+  border-right: 1px solid var(--color-surface0);
+}
+
+.code-content {
+  margin-left: 3.2em;
+  padding-left: 0.5em;
 }
 
 pre {
-  padding: 1.5rem;
+  padding: 1.5rem 0.5rem 1.5rem 0;
   overflow-x: auto;
   background: var(--color-crust);
   color: var(--color-text);
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   line-height: 1.7;
+  position: relative;
 }
 
 code {
@@ -493,84 +561,135 @@ code {
   }
 }
 
+
 /* Footer */
 .footer {
   text-align: center;
-  padding: 2rem;
+  padding: 1.2rem 0 0.8rem 0;
   color: var(--color-subtext1);
-  margin-top: 4rem;
+  margin-top: 2.5rem;
+  font-size: 0.95rem;
+  background: none;
+  border-top: 1px solid var(--color-surface0);
 }
 
 /* Responsive */
+
 @media (max-width: 768px) {
   .navbar-content {
-    padding: 0 1rem;
+    padding: 0 0.5rem;
+    height: 3rem;
   }
-  
+  .logo {
+    font-size: 1rem;
+  }
+  .brand {
+    font-size: 0.95rem;
+  }
   .mobile-menu-toggle {
     display: flex;
   }
-  
   .nav-links {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 280px;
+    width: 220px;
     height: 100vh;
     background: var(--color-mantle);
     border-left: 1px solid var(--color-surface0);
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 6rem 0 2rem 0;
+    padding: 4rem 0 1rem 0;
     gap: 0;
     transition: right 0.3s ease;
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(20px);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
   }
-  
   .nav-links.active {
     right: 0;
   }
-  
   .nav-links li {
     margin: 0;
   }
-  
   .nav-links a {
     display: block;
-    padding: 1rem 2rem;
+    padding: 0.8rem 1.2rem;
     border-radius: 0;
     border-bottom: 1px solid var(--color-surface0);
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-weight: 500;
   }
-  
   .nav-links a:hover {
     background: var(--color-surface0);
   }
-  
+  .hero {
+    padding: 2.2rem 0 1.2rem 0;
+    margin-bottom: 1.2rem;
+    border-radius: 10px;
+  }
   .hero h1 {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
   }
-  
   .hero p {
-    font-size: 1.1rem;
+    font-size: 0.98rem;
   }
-  
   .modules-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  
+  .module-card {
+    padding: 1rem 0.7rem;
+    font-size: 0.98rem;
+  }
   .module-links {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+  .file-browser {
+    margin-bottom: 1.2rem;
+    border-radius: 10px;
+  }
+  .file-link {
+    padding: 0.7rem 1rem;
+    font-size: 0.98rem;
+  }
+  .code-header {
+    font-size: 0.92rem;
+    padding: 0.5rem 0.7rem;
+  }
+  .code-lang, .code-filename {
+    font-size: 0.92rem;
+  }
+  .copy-button {
+    font-size: 0.92rem;
+    padding: 0.2rem 0.7rem;
+  }
+  .code-lines {
+    font-size: 0.8em;
+    width: 2.2em;
+    padding: 1rem 0.3em 1rem 0.3em;
+  }
+  .code-content {
+    margin-left: 2.2em;
+    padding-left: 0.3em;
+  }
+  pre {
+    font-size: 0.92rem;
+    padding: 1rem 0.3rem 1rem 0;
+  }
+  .footer {
+    font-size: 0.92rem;
+    padding: 0.7rem 0 0.5rem 0;
+    margin-top: 1.2rem;
+    border-radius: 0;
   }
 }
 `;
 
 function extractTSDocumentation(
   content: string,
-): { description?: string; exports: string[]; imports: string[]; } {
+): { description?: string; exports: string[]; imports: string[] } {
   const exports: string[] = [];
   const imports: string[] = [];
   let description: string | undefined;
@@ -629,8 +748,8 @@ async function analyzeProject(): Promise<ProjectStructure> {
   const structure: ProjectStructure = {
     name: "Andromeda Standard Library",
     description:
-      "A modern, type-safe standard library for Deno. Featuring collections, math utilities, data validation, and more.",
-    version: "1.0.0",
+      "A modern, type-safe standard library for Andromeda. Featuring collections, math utilities, data validation, and more.",
+    version: "0.1.0",
     rootFiles: [],
     directories: [],
   };
@@ -776,20 +895,18 @@ function generateModuleCards(structure: ProjectStructure): string {
     const fileCount = dir.files.filter((f) => f.name.endsWith(".ts")).length;
 
     cards += `
-            <div class="module-card fade-in-up">
-                <h3>${dir.icon} ${
-      dir.name.charAt(0).toUpperCase() + dir.name.slice(1)
-    }</h3>
-                <p>${description}</p>
-                <div style="margin: 1rem 0; display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-subtext0);">
-                    <span>📦 ${exportCount} exports</span>
-                    <span>📄 ${fileCount} files</span>
-                </div>
-                <div class="module-links">
-                    <a href="/${modFile.relativePath}" class="module-link">View Module</a>
-                    <a href="${BASE_URL}/${modFile.relativePath}" class="module-link">Import URL</a>
-                </div>
-            </div>`;
+      <div class="module-card fade-in-up">
+        <h3><span>${dir.icon}</span> ${dir.name.charAt(0).toUpperCase() + dir.name.slice(1)}</h3>
+        <p>${description}</p>
+        <div class="module-meta">
+          <span>📦 ${exportCount} exports</span>
+          <span>📄 ${fileCount} files</span>
+        </div>
+        <div class="module-links">
+          <a href="/${modFile.relativePath}" class="module-link">View Module</a>
+          <a href="${BASE_URL}/${modFile.relativePath}" class="module-link">Import URL</a>
+        </div>
+      </div>`;
   }
 
   return cards;
@@ -841,129 +958,120 @@ async function generateMainPage(): Promise<string> {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${structure.name}</title>
-    <style>${CSS_STYLES}</style>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${structure.name}</title>
+  <style>${CSS_STYLES}</style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-content">
-            <a href="/" class="logo">
-                <span>📚</span>
-                ${structure.name}
-            </a>
-            <ul class="nav-links" id="navLinks">
-                ${generateNavLinks(structure)}
-            </ul>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-        <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+  <header>
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar-content">
+        <a href="/" class="logo" aria-label="Andromeda Home">
+          <span aria-hidden="true">📚</span>
+          <span class="brand">Andromeda Std</span>
+        </a>
+        <ul class="nav-links" id="navLinks">
+          ${generateNavLinks(structure)}
+        </ul>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open menu" onclick="toggleMobileMenu()">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+      <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
     </nav>
+  </header>
 
+  <main>
     <div class="container">
-        <section class="hero fade-in-up">
-            <h1>${structure.name}</h1>
-            <p>${structure.description}</p>
-            <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; font-size: 0.875rem; color: var(--color-subtext0);">
-                <span>📁 ${structure.directories.length} directories</span>
-                <span>📄 ${
-    structure.rootFiles.length + structure.directories.reduce((acc, dir) =>
-      acc + dir.files.length, 0)
-  } files</span>
-                <span>🏷️ v${structure.version}</span>
-            </div>
-            <a href="/mod.ts" class="cta-button" style="margin-top: 2rem;">Explore Main Module</a>
-        </section>
+      <section class="hero fade-in-up" aria-label="Library overview">
+        <h1>${structure.name}</h1>
+        <p>${structure.description}</p>
+        <div class="hero-meta">
+          <span>📁 ${structure.directories.length} directories</span>
+          <span>📄 ${structure.rootFiles.length + structure.directories.reduce((acc, dir) => acc + dir.files.length, 0)} files</span>
+          <span>🏷️ v${structure.version}</span>
+        </div>
+      </section>
 
-        <section class="modules-grid">
-            ${generateModuleCards(structure)}
-        </section>
+      <section class="modules-grid" aria-label="Modules">
+        ${generateModuleCards(structure)}
+      </section>
 
-        <section class="file-browser fade-in-up">
-            <div class="file-browser-header">
-                <span>📁</span>
-                <span class="file-browser-title">Browse Files</span>
-            </div>
-            <ul class="file-list">
-                ${generateFileList(structure)}
-            </ul>
-        </section>
+      <section class="file-browser fade-in-up" aria-label="File browser">
+        <div class="file-browser-header">
+          <span aria-hidden="true">📁</span>
+          <span class="file-browser-title">Browse Files</span>
+        </div>
+        <ul class="file-list">
+          ${generateFileList(structure)}
+        </ul>
+      </section>
     </div>
+  </main>
 
-    <footer class="footer">
-        <p>&copy; 2025 ${structure.name}. Open source library.</p>
-    </footer>
+  <footer class="footer">
+    <p>&copy; 2025 ${structure.name} &mdash; Open source library.</p>
+  </footer>
 
-    <script>
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            const mobileToggle = document.getElementById('mobileMenuToggle');
-            const mobileOverlay = document.getElementById('mobileOverlay');
-            
-            navLinks.classList.toggle('active');
-            mobileToggle.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-            
-            if (navLinks.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
+  <script>
+    function toggleMobileMenu() {
+      const navLinks = document.getElementById('navLinks');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      navLinks.classList.toggle('active');
+      mobileToggle.classList.toggle('active');
+      mobileOverlay.classList.toggle('active');
+      if (navLinks.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+    function closeMobileMenu() {
+      const navLinks = document.getElementById('navLinks');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      navLinks.classList.remove('active');
+      mobileToggle.classList.remove('active');
+      mobileOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-links a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+      });
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          closeMobileMenu();
         }
-        
-        function closeMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            const mobileToggle = document.getElementById('mobileMenuToggle');
-            const mobileOverlay = document.getElementById('mobileOverlay');
-            
-            navLinks.classList.remove('active');
-            mobileToggle.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-            document.body.style.overflow = '';
+      });
+    });
+    function copyCode(button) {
+      const code = button.closest('.code-container').querySelector('code');
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      });
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in-up');
         }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.nav-links a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', closeMobileMenu);
-            });
-            
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    closeMobileMenu();
-                }
-            });
-        });
-
-        function copyCode(button) {
-            const code = button.closest('.code-container').querySelector('code');
-            navigator.clipboard.writeText(code.textContent).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 2000);
-            });
-        }
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in-up');
-                }
-            });
-        });
-
-        document.querySelectorAll('.module-card, .file-browser').forEach((el) => {
-            observer.observe(el);
-        });
-    </script>
+      });
+    });
+    document.querySelectorAll('.module-card, .file-browser').forEach((el) => {
+      observer.observe(el);
+    });
+  </script>
 </body>
 </html>`;
 }
@@ -971,11 +1079,11 @@ async function generateMainPage(): Promise<string> {
 function generateFilePage(filePath: string, content: string): string {
   const fileName = filePath.split("/").pop() || filePath;
   const fileExtension = fileName.split(".").pop() || "";
-  const language = fileExtension === "ts" ?
-    "TypeScript" :
-    fileExtension === "md" ?
-    "Markdown" :
-    "Text";
+  const language = fileExtension === "ts"
+    ? "TypeScript"
+    : fileExtension === "md"
+    ? "Markdown"
+    : "Text";
 
   let highlightedContent = content;
   if (fileExtension === "ts") {
@@ -997,109 +1105,112 @@ function generateFilePage(filePath: string, content: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${fileName} - Andromeda Standard Library</title>
-    <style>${CSS_STYLES}</style>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${fileName} - Andromeda Standard Library</title>
+  <style>${CSS_STYLES}</style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-content">
-            <a href="/" class="logo">
-                Andromeda Std
-            </a>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-        <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+  <header>
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar-content">
+        <a href="/" class="logo" aria-label="Andromeda Home">
+          <span aria-hidden="true">📚</span>
+          <span class="brand">Andromeda Std</span>
+        </a>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open menu" onclick="toggleMobileMenu()">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+      <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
     </nav>
+  </header>
 
+  <main>
     <div class="container">
-        <section class="hero fade-in-up">
-            <h1>${fileName}</h1>
-            <p>Viewing source code for ${filePath}</p>
-            <a href="/" class="cta-button" style="margin-top: 1rem;">← Back to Library</a>
-        </section>
+      <section class="hero fade-in-up" aria-label="File overview">
+        <h1>${fileName}</h1>
+        <p>Viewing source code for <span style="font-weight:600;">${filePath}</span></p>
+        <a href="/" class="cta-button">← Back to Library</a>
+      </section>
 
-        <section class="code-viewer fade-in-up">
-            <div class="code-container">
-                <div class="code-header">
-                    <span class="code-lang">${language}</span>
-                    <span class="code-filename">${fileName}</span>
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                </div>
-                <pre><code>${highlightedContent}</code></pre>
+      <section class="code-viewer fade-in-up" aria-label="Source code">
+        <div class="code-container">
+          <div class="code-header">
+            <span class="code-lang">${language}</span>
+            <span class="code-filename">${fileName}</span>
+            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div style="position:relative;">
+            <div class="code-lines">
+              ${Array.from({length: highlightedContent.split('\n').length}, (_, i) => i+1).join('<br>')}
             </div>
-        </section>
+            <pre class="code-content"><code>${highlightedContent}</code></pre>
+          </div>
+        </div>
+      </section>
     </div>
+  </main>
 
-    <footer class="footer">
-        <p>&copy; 2025 Andromeda Standard Library. Open source library.</p>
-    </footer>
+  <footer class="footer">
+    <p>&copy; 2025 Andromeda Standard Library &mdash; Open source library.</p>
+  </footer>
 
-    <script>
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            const mobileToggle = document.getElementById('mobileMenuToggle');
-            const mobileOverlay = document.getElementById('mobileOverlay');
-            
-            navLinks.classList.toggle('active');
-            mobileToggle.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-            
-            if (navLinks.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
+  <script>
+    function toggleMobileMenu() {
+      const navLinks = document.getElementById('navLinks');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      navLinks.classList.toggle('active');
+      mobileToggle.classList.toggle('active');
+      mobileOverlay.classList.toggle('active');
+      if (navLinks.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+    function closeMobileMenu() {
+      const navLinks = document.getElementById('navLinks');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      navLinks.classList.remove('active');
+      mobileToggle.classList.remove('active');
+      mobileOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-links a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+      });
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          closeMobileMenu();
         }
-        
-        function closeMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            const mobileToggle = document.getElementById('mobileMenuToggle');
-            const mobileOverlay = document.getElementById('mobileOverlay');
-            
-            navLinks.classList.remove('active');
-            mobileToggle.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.nav-links a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', closeMobileMenu);
-            });
-            
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    closeMobileMenu();
-                }
-            });
-        });
-
-        function copyCode(button) {
-            const code = button.closest('.code-container').querySelector('code');
-            navigator.clipboard.writeText(code.textContent).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 2000);
-            });
-        }
-    </script>
+      });
+    });
+    function copyCode(button) {
+      const code = button.closest('.code-container').querySelector('code');
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      });
+    }
+  </script>
 </body>
 </html>`;
 }
 
 async function handler(req: Request): Promise<Response> {
   async function callOpenAI(
-    messages: Array<{ role: string; content: string; }>,
+    messages: Array<{ role: string; content: string }>,
   ) {
     const apiKey = Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) {
@@ -1180,11 +1291,10 @@ async function handler(req: Request): Promise<Response> {
           });
         }
         const method = typeof body.method === "string" ? body.method : "";
-        const params = typeof body.params === "object" && body.params !== null ?
-          body.params :
-          {};
+        const params = typeof body.params === "object" && body.params !== null
+          ? body.params
+          : {};
         const id = body.id;
-        // Example prompt definitions
         const promptDefs = [
           {
             name: "code_review",
@@ -1242,18 +1352,18 @@ async function handler(req: Request): Promise<Response> {
           if (params && typeof params === "object") {
             if (
               "name" in params &&
-              typeof (params as { name: unknown; }).name === "string"
+              typeof (params as { name: unknown }).name === "string"
             ) {
-              name = (params as { name: string; }).name;
+              name = (params as { name: string }).name;
             }
             if (
               "arguments" in params &&
-              typeof (params as { arguments: unknown; }).arguments ===
+              typeof (params as { arguments: unknown }).arguments ===
                 "object" &&
-              (params as { arguments: unknown; }).arguments !== null
+              (params as { arguments: unknown }).arguments !== null
             ) {
               args =
-                (params as { arguments: Record<string, string>; }).arguments;
+                (params as { arguments: Record<string, string> }).arguments;
             }
           }
           const prompt = promptDefs.find((p) => p.name === name);
@@ -1280,7 +1390,7 @@ async function handler(req: Request): Promise<Response> {
               },
             );
           }
-          let openaiMessages: Array<{ role: string; content: string; }> = [];
+          let openaiMessages: Array<{ role: string; content: string }> = [];
           if (name === "code_review" && args.code) {
             openaiMessages = [
               {
@@ -1416,11 +1526,11 @@ async function handler(req: Request): Promise<Response> {
               name: file.name,
               title: file.name,
               description: file.description || file.type.description,
-              mimeType: file.type.language === "TypeScript" ?
-                "application/typescript" :
-                file.type.language === "Markdown" ?
-                "text/markdown" :
-                "text/plain",
+              mimeType: file.type.language === "TypeScript"
+                ? "application/typescript"
+                : file.type.language === "Markdown"
+                ? "text/markdown"
+                : "text/plain",
               annotations: {
                 audience: ["user", "assistant"],
                 priority: 0.7,
@@ -1435,11 +1545,11 @@ async function handler(req: Request): Promise<Response> {
                 name: file.name,
                 title: file.name,
                 description: file.description || file.type.description,
-                mimeType: file.type.language === "TypeScript" ?
-                  "application/typescript" :
-                  file.type.language === "Markdown" ?
-                  "text/markdown" :
-                  "text/plain",
+                mimeType: file.type.language === "TypeScript"
+                  ? "application/typescript"
+                  : file.type.language === "Markdown"
+                  ? "text/markdown"
+                  : "text/plain",
                 annotations: {
                   audience: ["user", "assistant"],
                   priority: 0.7,
@@ -1473,7 +1583,7 @@ async function handler(req: Request): Promise<Response> {
         if (method === "resources/read") {
           let uri = "";
           if (params && typeof params === "object" && "uri" in params) {
-            uri = (params as { uri: string; }).uri;
+            uri = (params as { uri: string }).uri;
           }
           if (!uri || !uri.startsWith("file://")) {
             return new Response(
@@ -1559,11 +1669,11 @@ async function handler(req: Request): Promise<Response> {
                       uri,
                       name: fileInfo.name,
                       title: fileInfo.name,
-                      mimeType: fileInfo.type.language === "TypeScript" ?
-                        "application/typescript" :
-                        fileInfo.type.language === "Markdown" ?
-                        "text/markdown" :
-                        "text/plain",
+                      mimeType: fileInfo.type.language === "TypeScript"
+                        ? "application/typescript"
+                        : fileInfo.type.language === "Markdown"
+                        ? "text/markdown"
+                        : "text/plain",
                       text: fileContent,
                       annotations: {
                         audience: ["user", "assistant"],
@@ -1843,19 +1953,15 @@ async function handler(req: Request): Promise<Response> {
         const content = await Deno.readTextFile(filePath);
         const ext = pathname.split(".").pop()?.toLowerCase();
 
-        // Check if this is a request for raw content (for imports) vs viewing
         const acceptHeader = req.headers.get("accept") || "";
         const userAgent = req.headers.get("user-agent") || "";
 
-        // Browser requests typically include "text/html" and have user-agent
-        // Import requests typically don't include "text/html" or are from deno/node
         const isBrowserRequest = acceptHeader.includes("text/html") ||
           userAgent.includes("Mozilla") ||
           userAgent.includes("Chrome") ||
           userAgent.includes("Safari") ||
           userAgent.includes("Firefox");
 
-        // For TypeScript files: serve HTML viewer for browsers, raw content for imports
         if (ext === "ts") {
           if (isBrowserRequest) {
             return new Response(generateFilePage(pathname, content), {
@@ -1872,13 +1978,13 @@ async function handler(req: Request): Promise<Response> {
         }
 
         // For other file types
-        const contentType = ext === "js" ?
-          "application/javascript" :
-          ext === "json" ?
-          "application/json" :
-          ext === "md" ?
-          "text/html" :
-          "text/plain";
+        const contentType = ext === "js"
+          ? "application/javascript"
+          : ext === "json"
+          ? "application/json"
+          : ext === "md"
+          ? "text/html"
+          : "text/plain";
 
         if (ext === "md" || ext === "json") {
           return new Response(generateFilePage(pathname, content), {
