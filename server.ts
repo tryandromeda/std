@@ -154,31 +154,6 @@ body {
 
 /* Navigation */
 .navbar {
-  
-  // MCP root endpoint handler
-  if (pathname === "/mcp") {
-    return new Response(
-      JSON.stringify({
-        status: "ok",
-        name: "Andromeda Standard Library MCP Server",
-        version: "1.0.0",
-        endpoints: [
-          "/mcp/prompts",
-          "/mcp/resources",
-          "/mcp/metadata",
-          "/mcp/project",
-          "/mcp/file",
-          "/mcp/module"
-        ]
-      }, null, 2),
-      {
-        headers: {
-          "content-type": "application/json",
-          "access-control-allow-origin": "*",
-        },
-      }
-    );
-  }
   background: var(--color-mantle);
   border-bottom: 1px solid var(--color-surface0);
   position: sticky;
@@ -1152,7 +1127,33 @@ async function handler(req: Request): Promise<Response> {
   }
   const url = new URL(req.url);
   const pathname = url.pathname;
-
+  if (pathname === "/mcp") {
+    return new Response(
+      JSON.stringify(
+        {
+          status: "ok",
+          name: "Andromeda Standard Library MCP Server",
+          version: "1.0.0",
+          endpoints: [
+            "/mcp/prompts",
+            "/mcp/resources",
+            "/mcp/metadata",
+            "/mcp/project",
+            "/mcp/file",
+            "/mcp/module",
+          ],
+        },
+        null,
+        2,
+      ),
+      {
+        headers: {
+          "content-type": "application/json",
+          "access-control-allow-origin": "*",
+        },
+      },
+    );
+  }
   try {
     if (pathname.startsWith("/mcp/")) {
       // MCP JSON-RPC prompts protocol
@@ -1255,7 +1256,7 @@ async function handler(req: Request): Promise<Response> {
                 (params as { arguments: Record<string, string>; }).arguments;
             }
           }
-          const prompt = promptDefs.find(p => p.name === name);
+          const prompt = promptDefs.find((p) => p.name === name);
           if (!prompt) {
             return new Response(
               JSON.stringify(
@@ -1502,14 +1503,16 @@ async function handler(req: Request): Promise<Response> {
           let fileContent = "";
           let fileInfo: FileInfo | null = null;
           const structure = await getProjectStructure();
-          const foundRoot = structure.rootFiles.find(f =>
+          const foundRoot = structure.rootFiles.find((f) =>
             f.relativePath === relPath
           );
           if (foundRoot) {
             fileInfo = foundRoot;
           } else {
             for (const dir of structure.directories) {
-              const foundDir = dir.files.find(f => f.relativePath === relPath);
+              const foundDir = dir.files.find((f) =>
+                f.relativePath === relPath
+              );
               if (foundDir) {
                 fileInfo = foundDir;
                 break;
@@ -1742,12 +1745,12 @@ async function handler(req: Request): Promise<Response> {
           );
         }
         const structure = await getProjectStructure();
-        let fileInfo = structure.rootFiles.find(f =>
+        let fileInfo = structure.rootFiles.find((f) =>
           f.relativePath === filePath || f.name === filePath
         );
         if (!fileInfo) {
           for (const dir of structure.directories) {
-            fileInfo = dir.files.find(f =>
+            fileInfo = dir.files.find((f) =>
               f.relativePath === filePath || f.name === filePath
             );
             if (fileInfo) break;
@@ -1791,7 +1794,9 @@ async function handler(req: Request): Promise<Response> {
           );
         }
         const structure = await getProjectStructure();
-        const dirInfo = structure.directories.find(d => d.name === moduleName);
+        const dirInfo = structure.directories.find((d) =>
+          d.name === moduleName
+        );
         if (!dirInfo) {
           // Return 401 Unauthorized with WWW-Authenticate header for MCP spec
           return new Response(
