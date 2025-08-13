@@ -1,5 +1,5 @@
-// const BASE_URL = "https://std.load1n9.deno.net/mcp";
-const BASE_URL = "http://localhost:8000/mcp";
+const BASE_URL = "https://std.load1n9.deno.net/mcp";
+// const BASE_URL = "http://localhost:8000/mcp";
 
 async function post(endpoint: string, body: object) {
   const res = await fetch(`${BASE_URL}/${endpoint}`, {
