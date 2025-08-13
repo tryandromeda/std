@@ -154,6 +154,31 @@ body {
 
 /* Navigation */
 .navbar {
+  
+  // MCP root endpoint handler
+  if (pathname === "/mcp") {
+    return new Response(
+      JSON.stringify({
+        status: "ok",
+        name: "Andromeda Standard Library MCP Server",
+        version: "1.0.0",
+        endpoints: [
+          "/mcp/prompts",
+          "/mcp/resources",
+          "/mcp/metadata",
+          "/mcp/project",
+          "/mcp/file",
+          "/mcp/module"
+        ]
+      }, null, 2),
+      {
+        headers: {
+          "content-type": "application/json",
+          "access-control-allow-origin": "*",
+        },
+      }
+    );
+  }
   background: var(--color-mantle);
   border-bottom: 1px solid var(--color-surface0);
   position: sticky;
@@ -893,26 +918,6 @@ async function generateMainPage(): Promise<string> {
             <ul class="file-list">
                 ${generateFileList(structure)}
             </ul>
-        </section>
-
-        <section class="fade-in-up">
-            <h2 style="margin-bottom: 1rem; font-size: 1.75rem; font-weight: 600;">Quick Start</h2>
-            <div class="code-container">
-                <div class="code-header">
-                    <span class="code-lang">TypeScript</span>
-                    <span class="code-filename">example.ts</span>
-                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
-                </div>
-                <pre><code>
-import { ${
-    structure.rootFiles.find((f) => f.name === "mod.ts")?.exports?.slice(
-      0,
-      4,
-    ).join(", ") || "functions"
-  } } from "${BASE_URL}/mod.ts";
-
-console.log('Ready to use ${structure.name}!');</code></pre>
-            </div>
         </section>
     </div>
 

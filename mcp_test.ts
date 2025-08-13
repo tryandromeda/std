@@ -31,7 +31,6 @@ await post("resources", {
   id: 3,
 });
 
-// Test OpenAI-powered code review prompt
 await post("prompts", {
   jsonrpc: "2.0",
   method: "prompts/get",
@@ -42,4 +41,24 @@ await post("prompts", {
     },
   },
   id: 4,
+});
+
+const readme = await post("resources", {
+  jsonrpc: "2.0",
+  method: "resources/read",
+  params: { uri: "file:///README.md" },
+  id: 5,
+});
+const readmeText = readme.result?.contents?.[0]?.text ?? "";
+
+await post("prompts", {
+  jsonrpc: "2.0",
+  method: "prompts/get",
+  params: {
+    name: "doc_summary",
+    arguments: {
+      doc: readmeText,
+    },
+  },
+  id: 6,
 });
