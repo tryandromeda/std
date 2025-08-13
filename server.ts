@@ -1330,12 +1330,19 @@ async function handler(req: Request): Promise<Response> {
                 jsonrpc: "2.0",
                 id,
                 result: {
-                  server: "Andromeda MCP Server",
-                  version: "1.0.0",
+                  protocolVersion: "2025-06-18",
                   capabilities: {
-                    prompts: ["list", "get"],
-                    resources: ["list", "read", "templates/list", "subscribe"],
+                    logging: {},
+                    prompts: { listChanged: true },
+                    resources: { subscribe: true, listChanged: true },
+                    tools: { listChanged: true }
                   },
+                  serverInfo: {
+                    name: "Andromeda MCP Server",
+                    title: "Andromeda Standard Library MCP Server",
+                    version: "1.0.0"
+                  },
+                  instructions: "Welcome to the Andromeda MCP server. Use prompts, resources, and tools as described in the MCP spec."
                 },
               },
               null,
