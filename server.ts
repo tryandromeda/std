@@ -689,7 +689,7 @@ code {
 
 function extractTSDocumentation(
   content: string,
-): { description?: string; exports: string[]; imports: string[] } {
+): { description?: string; exports: string[]; imports: string[]; } {
   const exports: string[] = [];
   const imports: string[] = [];
   let description: string | undefined;
@@ -896,7 +896,9 @@ function generateModuleCards(structure: ProjectStructure): string {
 
     cards += `
       <div class="module-card fade-in-up">
-        <h3><span>${dir.icon}</span> ${dir.name.charAt(0).toUpperCase() + dir.name.slice(1)}</h3>
+        <h3><span>${dir.icon}</span> ${
+      dir.name.charAt(0).toUpperCase() + dir.name.slice(1)
+    }</h3>
         <p>${description}</p>
         <div class="module-meta">
           <span>📦 ${exportCount} exports</span>
@@ -992,7 +994,10 @@ async function generateMainPage(): Promise<string> {
         <p>${structure.description}</p>
         <div class="hero-meta">
           <span>📁 ${structure.directories.length} directories</span>
-          <span>📄 ${structure.rootFiles.length + structure.directories.reduce((acc, dir) => acc + dir.files.length, 0)} files</span>
+          <span>📄 ${
+    structure.rootFiles.length + structure.directories.reduce((acc, dir) =>
+      acc + dir.files.length, 0)
+  } files</span>
           <span>🏷️ v${structure.version}</span>
         </div>
       </section>
@@ -1079,11 +1084,11 @@ async function generateMainPage(): Promise<string> {
 function generateFilePage(filePath: string, content: string): string {
   const fileName = filePath.split("/").pop() || filePath;
   const fileExtension = fileName.split(".").pop() || "";
-  const language = fileExtension === "ts"
-    ? "TypeScript"
-    : fileExtension === "md"
-    ? "Markdown"
-    : "Text";
+  const language = fileExtension === "ts" ?
+    "TypeScript" :
+    fileExtension === "md" ?
+    "Markdown" :
+    "Text";
 
   let highlightedContent = content;
   if (fileExtension === "ts") {
@@ -1146,7 +1151,12 @@ function generateFilePage(filePath: string, content: string): string {
           </div>
           <div style="position:relative;">
             <div class="code-lines">
-              ${Array.from({length: highlightedContent.split('\n').length}, (_, i) => i+1).join('<br>')}
+              ${
+    Array.from(
+      { length: highlightedContent.split("\n").length },
+      (_, i) => i + 1,
+    ).join("<br>")
+  }
             </div>
             <pre class="code-content"><code>${highlightedContent}</code></pre>
           </div>
@@ -1210,7 +1220,7 @@ function generateFilePage(filePath: string, content: string): string {
 
 async function handler(req: Request): Promise<Response> {
   async function callOpenAI(
-    messages: Array<{ role: string; content: string }>,
+    messages: Array<{ role: string; content: string; }>,
   ) {
     const apiKey = Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) {
@@ -1291,9 +1301,9 @@ async function handler(req: Request): Promise<Response> {
           });
         }
         const method = typeof body.method === "string" ? body.method : "";
-        const params = typeof body.params === "object" && body.params !== null
-          ? body.params
-          : {};
+        const params = typeof body.params === "object" && body.params !== null ?
+          body.params :
+          {};
         const id = body.id;
         const promptDefs = [
           {
@@ -1324,25 +1334,62 @@ async function handler(req: Request): Promise<Response> {
         ];
         // prompts/initialize (for extension initialization)
         if (method === "initialize") {
+          // Parse protocolVersion from params if present
+          let requestedVersion = "";
+          if (
+            params && typeof params === "object" && "protocolVersion" in params
+          ) {
+            requestedVersion =
+              (params as { protocolVersion: string; }).protocolVersion;
+          }
+          const supportedVersion = "2025-06-18";
+          if (requestedVersion && requestedVersion !== supportedVersion) {
+            return new Response(
+              JSON.stringify(
+                {
+                  jsonrpc: "2.0",
+                  id,
+                  error: {
+                    code: -32602,
+                    message: "Unsupported protocol version",
+                    data: {
+                      supported: [supportedVersion],
+                      requested: requestedVersion,
+                    },
+                  },
+                },
+                null,
+                2,
+              ),
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*",
+                },
+              },
+            );
+          }
+          const sessionId = crypto.randomUUID();
           return new Response(
             JSON.stringify(
               {
                 jsonrpc: "2.0",
                 id,
                 result: {
-                  protocolVersion: "2025-06-18",
+                  protocolVersion: supportedVersion,
                   capabilities: {
                     logging: {},
                     prompts: { listChanged: true },
                     resources: { subscribe: true, listChanged: true },
-                    tools: { listChanged: true }
+                    tools: { listChanged: true },
                   },
                   serverInfo: {
                     name: "Andromeda MCP Server",
                     title: "Andromeda Standard Library MCP Server",
-                    version: "1.0.0"
+                    version: "1.0.0",
                   },
-                  instructions: "Welcome to the Andromeda MCP server. Use prompts, resources, and tools as described in the MCP spec."
+                  instructions:
+                    "Welcome to the Andromeda MCP server. Use prompts, resources, and tools as described in the MCP spec.",
                 },
               },
               null,
@@ -1352,6 +1399,7 @@ async function handler(req: Request): Promise<Response> {
               headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
+                "Mcp-Session-Id": sessionId,
               },
             },
           );
@@ -1386,18 +1434,18 @@ async function handler(req: Request): Promise<Response> {
           if (params && typeof params === "object") {
             if (
               "name" in params &&
-              typeof (params as { name: unknown }).name === "string"
+              typeof (params as { name: unknown; }).name === "string"
             ) {
-              name = (params as { name: string }).name;
+              name = (params as { name: string; }).name;
             }
             if (
               "arguments" in params &&
-              typeof (params as { arguments: unknown }).arguments ===
+              typeof (params as { arguments: unknown; }).arguments ===
                 "object" &&
-              (params as { arguments: unknown }).arguments !== null
+              (params as { arguments: unknown; }).arguments !== null
             ) {
               args =
-                (params as { arguments: Record<string, string> }).arguments;
+                (params as { arguments: Record<string, string>; }).arguments;
             }
           }
           const prompt = promptDefs.find((p) => p.name === name);
@@ -1424,7 +1472,7 @@ async function handler(req: Request): Promise<Response> {
               },
             );
           }
-          let openaiMessages: Array<{ role: string; content: string }> = [];
+          let openaiMessages: Array<{ role: string; content: string; }> = [];
           if (name === "code_review" && args.code) {
             openaiMessages = [
               {
@@ -1560,11 +1608,11 @@ async function handler(req: Request): Promise<Response> {
               name: file.name,
               title: file.name,
               description: file.description || file.type.description,
-              mimeType: file.type.language === "TypeScript"
-                ? "application/typescript"
-                : file.type.language === "Markdown"
-                ? "text/markdown"
-                : "text/plain",
+              mimeType: file.type.language === "TypeScript" ?
+                "application/typescript" :
+                file.type.language === "Markdown" ?
+                "text/markdown" :
+                "text/plain",
               annotations: {
                 audience: ["user", "assistant"],
                 priority: 0.7,
@@ -1579,11 +1627,11 @@ async function handler(req: Request): Promise<Response> {
                 name: file.name,
                 title: file.name,
                 description: file.description || file.type.description,
-                mimeType: file.type.language === "TypeScript"
-                  ? "application/typescript"
-                  : file.type.language === "Markdown"
-                  ? "text/markdown"
-                  : "text/plain",
+                mimeType: file.type.language === "TypeScript" ?
+                  "application/typescript" :
+                  file.type.language === "Markdown" ?
+                  "text/markdown" :
+                  "text/plain",
                 annotations: {
                   audience: ["user", "assistant"],
                   priority: 0.7,
@@ -1617,7 +1665,7 @@ async function handler(req: Request): Promise<Response> {
         if (method === "resources/read") {
           let uri = "";
           if (params && typeof params === "object" && "uri" in params) {
-            uri = (params as { uri: string }).uri;
+            uri = (params as { uri: string; }).uri;
           }
           if (!uri || !uri.startsWith("file://")) {
             return new Response(
@@ -1703,11 +1751,11 @@ async function handler(req: Request): Promise<Response> {
                       uri,
                       name: fileInfo.name,
                       title: fileInfo.name,
-                      mimeType: fileInfo.type.language === "TypeScript"
-                        ? "application/typescript"
-                        : fileInfo.type.language === "Markdown"
-                        ? "text/markdown"
-                        : "text/plain",
+                      mimeType: fileInfo.type.language === "TypeScript" ?
+                        "application/typescript" :
+                        fileInfo.type.language === "Markdown" ?
+                        "text/markdown" :
+                        "text/plain",
                       text: fileContent,
                       annotations: {
                         audience: ["user", "assistant"],
@@ -2012,13 +2060,13 @@ async function handler(req: Request): Promise<Response> {
         }
 
         // For other file types
-        const contentType = ext === "js"
-          ? "application/javascript"
-          : ext === "json"
-          ? "application/json"
-          : ext === "md"
-          ? "text/html"
-          : "text/plain";
+        const contentType = ext === "js" ?
+          "application/javascript" :
+          ext === "json" ?
+          "application/json" :
+          ext === "md" ?
+          "text/html" :
+          "text/plain";
 
         if (ext === "md" || ext === "json") {
           return new Response(generateFilePage(pathname, content), {
