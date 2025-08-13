@@ -561,7 +561,7 @@ code {
 
 function extractTSDocumentation(
   content: string,
-): { description?: string; exports: string[]; imports: string[] } {
+): { description?: string; exports: string[]; imports: string[]; } {
   const exports: string[] = [];
   const imports: string[] = [];
   let description: string | undefined;
@@ -978,11 +978,11 @@ console.log('Ready to use ${structure.name}!');</code></pre>
 function generateFilePage(filePath: string, content: string): string {
   const fileName = filePath.split("/").pop() || filePath;
   const fileExtension = fileName.split(".").pop() || "";
-  const language = fileExtension === "ts"
-    ? "TypeScript"
-    : fileExtension === "md"
-    ? "Markdown"
-    : "Text";
+  const language = fileExtension === "ts" ?
+    "TypeScript" :
+    fileExtension === "md" ?
+    "Markdown" :
+    "Text";
 
   let highlightedContent = content;
   if (fileExtension === "ts") {
@@ -1109,6 +1109,100 @@ async function handler(req: Request): Promise<Response> {
   const pathname = url.pathname;
 
   try {
+    if (pathname.startsWith("/mcp/")) {
+      if (pathname === "/mcp/project") {
+        const structure = await getProjectStructure();
+        return new Response(JSON.stringify(structure, null, 2), {
+          headers: {
+            "content-type": "application/json",
+            "access-control-allow-origin": "*",
+          },
+        });
+      }
+      if (pathname === "/mcp/file") {
+        const urlObj = new URL(req.url);
+        const filePath = urlObj.searchParams.get("path");
+        if (!filePath) {
+          return new Response(
+            JSON.stringify({ error: "Missing 'path' parameter" }),
+            {
+              status: 400,
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        const structure = await getProjectStructure();
+        let fileInfo = structure.rootFiles.find(f =>
+          f.relativePath === filePath || f.name === filePath
+        );
+        if (!fileInfo) {
+          for (const dir of structure.directories) {
+            fileInfo = dir.files.find(f =>
+              f.relativePath === filePath || f.name === filePath
+            );
+            if (fileInfo) break;
+          }
+        }
+        if (!fileInfo) {
+          return new Response(JSON.stringify({ error: "File not found" }), {
+            status: 404,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          });
+        }
+        return new Response(JSON.stringify(fileInfo, null, 2), {
+          headers: {
+            "content-type": "application/json",
+            "access-control-allow-origin": "*",
+          },
+        });
+      }
+      if (pathname === "/mcp/module") {
+        const urlObj = new URL(req.url);
+        const moduleName = urlObj.searchParams.get("name");
+        if (!moduleName) {
+          return new Response(
+            JSON.stringify({ error: "Missing 'name' parameter" }),
+            {
+              status: 400,
+              headers: {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+              },
+            },
+          );
+        }
+        const structure = await getProjectStructure();
+        const dirInfo = structure.directories.find(d => d.name === moduleName);
+        if (!dirInfo) {
+          return new Response(JSON.stringify({ error: "Module not found" }), {
+            status: 404,
+            headers: {
+              "content-type": "application/json",
+              "access-control-allow-origin": "*",
+            },
+          });
+        }
+        return new Response(JSON.stringify(dirInfo, null, 2), {
+          headers: {
+            "content-type": "application/json",
+            "access-control-allow-origin": "*",
+          },
+        });
+      }
+      return new Response(JSON.stringify({ error: "Unknown MCP endpoint" }), {
+        status: 404,
+        headers: {
+          "content-type": "application/json",
+          "access-control-allow-origin": "*",
+        },
+      });
+    }
     if (pathname === "/" || pathname === "/index.html") {
       return new Response(await generateMainPage(), {
         headers: { "content-type": "text/html" },
@@ -1154,13 +1248,13 @@ async function handler(req: Request): Promise<Response> {
         }
 
         // For other file types
-        const contentType = ext === "js"
-          ? "application/javascript"
-          : ext === "json"
-          ? "application/json"
-          : ext === "md"
-          ? "text/html"
-          : "text/plain";
+        const contentType = ext === "js" ?
+          "application/javascript" :
+          ext === "json" ?
+          "application/json" :
+          ext === "md" ?
+          "text/html" :
+          "text/plain";
 
         if (ext === "md" || ext === "json") {
           return new Response(generateFilePage(pathname, content), {
