@@ -8,3 +8,5 @@ Andromeda standard library
 | [Data](./data)               | Data manipulation and processing utilities.               |
 | [Math](./math)               | Math library with extra functions and structures.         |
 | [Signals](./signals)         | Signal library with extra functions and structures.       |
+| [Time](./time)               | Time formatting and helper utilities.                    |
+| [Utils](./utils)             | Small general-purpose helper utilities.                  |

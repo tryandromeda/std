@@ -1,7 +1,7 @@
 /**
  * Shape Type
  */
-export type Shape<R extends Rank> = [number, ...number[]] & { length: R };
+export type Shape<R extends Rank> = [number, ...number[]] & { length: R; };
 
 /**
  * 1st dimentional shape.

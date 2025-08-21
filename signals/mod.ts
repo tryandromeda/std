@@ -294,7 +294,7 @@ export function createReadonly<T>(value: T): Omit<Signal<T>, "setValue"> {
  * ```
  */
 export function combine<T extends readonly unknown[], R>(
-  signals: { [K in keyof T]: Signal<T[K]> },
+  signals: { [K in keyof T]: Signal<T[K]>; },
   combiner: (values: T) => R,
 ): ComputedSignal<R> {
   return createComputed(() => {
