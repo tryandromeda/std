@@ -117,7 +117,7 @@ export function createComputed<T>(computeFn: ComputeFn<T>): ComputedSignal<T> {
 
   function recompute() {
     // Clear previous dependencies
-    dependencies.forEach(cleanup => cleanup());
+    dependencies.forEach((cleanup) => cleanup());
     dependencies.length = 0;
 
     const prevEffect = currentEffect;
@@ -189,7 +189,7 @@ export function createEffect(effectFn: EffectFn): () => void {
 
   function runEffect() {
     // Clear previous dependencies
-    dependencies.forEach(dep => dep());
+    dependencies.forEach((dep) => dep());
     dependencies.length = 0;
 
     // Run cleanup from previous effect
@@ -208,7 +208,7 @@ export function createEffect(effectFn: EffectFn): () => void {
   runEffect();
 
   return () => {
-    dependencies.forEach(dep => dep());
+    dependencies.forEach((dep) => dep());
     if (typeof cleanup === "function") {
       cleanup();
     }
@@ -239,7 +239,7 @@ export function batch(fn: () => void): void {
     if (batchDepth === 0) {
       const updates = [...batchedUpdates];
       batchedUpdates.length = 0;
-      updates.forEach(update => update());
+      updates.forEach((update) => update());
     }
   }
 }
@@ -294,11 +294,11 @@ export function createReadonly<T>(value: T): Omit<Signal<T>, "setValue"> {
  * ```
  */
 export function combine<T extends readonly unknown[], R>(
-  signals: { [K in keyof T]: Signal<T[K]>; },
+  signals: { [K in keyof T]: Signal<T[K]> },
   combiner: (values: T) => R,
 ): ComputedSignal<R> {
   return createComputed(() => {
-    const values = signals.map(signal => signal.value) as unknown as T;
+    const values = signals.map((signal) => signal.value) as unknown as T;
     return combiner(values);
   });
 }

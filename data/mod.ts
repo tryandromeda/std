@@ -252,10 +252,12 @@ export function intersect<T>(...arrays: T[][]): T[] {
   if (arrays.length === 0) return [];
   if (arrays.length === 1) return unique(arrays[0]!);
 
-  const sets = arrays.map(arr => new Set(arr));
+  const sets = arrays.map((arr) => new Set(arr));
   const [first, ...rest] = sets;
 
-  return Array.from(first!).filter(item => rest.every(set => set.has(item)));
+  return Array.from(first!).filter((item) =>
+    rest.every((set) => set.has(item))
+  );
 }
 
 /**
@@ -268,7 +270,7 @@ export function intersect<T>(...arrays: T[][]): T[] {
  */
 export function difference<T>(array: T[], ...others: T[][]): T[] {
   const othersSet = new Set(others.flat());
-  return array.filter(item => !othersSet.has(item));
+  return array.filter((item) => !othersSet.has(item));
 }
 
 /**
