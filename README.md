@@ -6,6 +6,7 @@ Andromeda standard library
 | ---------------------------- | --------------------------------------------------------- |
 | [Collections](./collections) | Collection data structures like linked lists, trees, etc. |
 | [Data](./data)               | Data manipulation and processing utilities.               |
+| [Dotenv](./dotenv)           | Load and parse environment variables from `.env` files.   |
 | [Math](./math)               | Math library with extra functions and structures.         |
 | [Signals](./signals)         | Signal library with extra functions and structures.       |
 | [Time](./time)               | Time formatting and helper utilities.                    |
